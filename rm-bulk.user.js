@@ -97,6 +97,22 @@
         // again, e.onclick failed me here so this is a janky fix
         e.setAttribute("onclick", "bulkUpdateJourneys(this)");
     }
+
+    // for every date, add buttons and make its group have an ID
+    let dateNum = 0;
+    for (const e of document.querySelectorAll("h3")) {
+        e.nextElementSibling.id = `date-${dateNum}`;
+
+        e.innerHTML += `
+            <span>
+                <button class="aux-butt" onclick="markJourneys('all', 'date-${dateNum}')">✅ Mark All</button>
+                <button class="aux-butt" onclick="markJourneys('none', 'date-${dateNum}')">❌ Mark None</button>
+                <button class="aux-butt" onclick="markJourneys('invert', 'date-${dateNum}')">🔄 Invert Marked</button>
+            </span>
+        `;
+
+        dateNum++;
+    }
 })();
 
 
@@ -148,10 +164,8 @@ unsafeWindow.showJourneyIframe = function(journeyID,formElement,value) {
     }, 2000);
 }
 
-unsafeWindow.markJourneys = function(action, element) {
-    if(element) return alert("todo!");
-
-    const allJourneys = document.querySelectorAll(".journey.clearfix:not(.deleted)");
+unsafeWindow.markJourneys = function(action, dateNumber) {
+    const allJourneys = document.querySelectorAll(`${dateNumber?`#${dateNumber}`:""} .journey.clearfix:not(.deleted)`);
 
     switch(action) {
         case "all":
@@ -174,5 +188,6 @@ unsafeWindow.markJourneys = function(action, element) {
 
 // this is horrible to work in but oh well
 GM_addStyle(`
-    .journey.clearfix.bulk-selected { background-color: lightblue };
+    .journey.clearfix.bulk-selected { background-color: lightblue }
+    .aux-butt { background-color: #eee; color: #008CBA; font-size: 0.5em; padding: 0.5em 2em; }
 `);
