@@ -7,6 +7,7 @@
 // @match        https://my.railmiles.me/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=railmiles.me
 // @grant        GM_addStyle
+// @grant        unsafeWindow
 // ==/UserScript==
 
 (function() {
@@ -48,7 +49,7 @@
         // submit the form after a short delay!
         const delaySecs = 0;
         window.setTimeout(function() {
-            //document.querySelector("form[method=post]").submit();
+            document.querySelector("form[method=post]").submit();
         }, delaySecs*1000);
 
         return; // we are done here (todo: close iframe after a delay?)
@@ -83,19 +84,63 @@
         <button class="bulk-butt" data-form="reason" data-value="4">🕘 Commute</button>
         <button class="bulk-butt" data-form="reason" data-value="3">❓ Other</button>
     `;
+
+    // make the buttons work!
+    for(const e of document.querySelectorAll(".bulk-butt")) {
+        // again, e.onclick failed me here so this is a janky fix
+        e.setAttribute("onclick", "bulkUpdateJourneys(this)");
+    }
 })();
 
 
-window.showIframe = function(journeyID,formElement,value) {
+// not sure why we need unsafeWindow since a second ago it was working with just window...
+// journeyQueue is so we can space out the requests and not load a lot of iframes at once
+unsafeWindow.journeyQueue = 0;
+// buffer time is the ms to wait between updating each journey
+unsafeWindow.bufferTime = 1000;
+
+unsafeWindow.bulkUpdateJourneys = function(pushedButton) {
+    if(!pushedButton) return;
+
+    const formName = pushedButton.getAttribute("data-form");
+    const formValue = pushedButton.getAttribute("data-value");
+
+    // get all of the marked journeys
+    const marked = document.querySelectorAll(".bulk-selected");
+
+    for(const j of marked) {
+        // increase the queue length for buffering
+        unsafeWindow.journeyQueue++;
+        console.log("+", unsafeWindow.journeyQueue);
+
+        // get the journey ID
+        const jID = j.children[0].getAttribute("journey-id");
+
+        // update the journey after a set time
+        window.setTimeout(function() {
+            showJourneyIframe(jID, formName, formValue);
+        }, unsafeWindow.bufferTime*unsafeWindow.journeyQueue);
+
+    }
+}
+
+unsafeWindow.showJourneyIframe = function(journeyID,formElement,value) {
     if(!journeyID) return;
 
     let urlHash = ``;
+
     if(formElement) urlHash = `#${formElement}=${value}`;
 
     document.querySelector(`[journey-id="${journeyID}"]`).parentElement.innerHTML += `
         <iframe src="https://my.railmiles.me/journeys/edit/${journeyID}${urlHash}" style="width: 100%; height: 300px;"></iframe>
     `;
+
+    unsafeWindow.setTimeout(function() {
+        unsafeWindow.journeyQueue--;
+        console.log("-", unsafeWindow.journeyQueue);
+    }, 2000);
 }
+
 
 // this is horrible to work in but oh well
 GM_addStyle(`
