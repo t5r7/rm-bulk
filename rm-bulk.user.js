@@ -81,9 +81,15 @@
         <button class="aux-butt" onclick="markJourneys('none')">❌ Mark None</button>
         <button class="aux-butt" onclick="markJourneys('invert')">🔄 Invert Marked</button>
 
+        <!-- hacky space between buttons -->
+        <span style="display:inline-block;width:2em;"></span>
+        <button class="aux-butt" onclick="closeFrames()">🖼️ Close Frames</button>
+
         <br><br>
 
         <b style="font-size: 1.5em;">Actions</b> <span style="color: darkred;">There is no undo!</span> Please be sure you have the right journeys selected!</span><br>
+
+        <br>
 
         Update Travel Reason:<br>
         <button class="bulk-butt" data-form="reason" data-value="0">🏖️ Leisure</button>
@@ -91,6 +97,13 @@
         <button class="bulk-butt" data-form="reason" data-value="2">👷 Crew</button>
         <button class="bulk-butt" data-form="reason" data-value="4">🕘 Commute</button>
         <button class="bulk-butt" data-form="reason" data-value="3">❓ Other</button>
+
+        <br><br>
+
+        Update Visibility:<br>
+        <button class="bulk-butt" data-form="hidden" data-value="0">🌍 Visible to All</button>
+        <button class="bulk-butt" data-form="hidden" data-value="1">😊 Visible to Friends</button>
+        <button class="bulk-butt" data-form="hidden" data-value="10">🥷 Hidden</button>
     `;
 
     // make the buttons work!
@@ -121,7 +134,7 @@
 // journeyQueue is so we can space out the requests and not load a lot of iframes at once
 unsafeWindow.journeyQueue = 0;
 // buffer time is the ms to wait between updating each journey
-unsafeWindow.bufferTime = 1000;
+unsafeWindow.bufferTime = 500;
 
 unsafeWindow.bulkUpdateJourneys = function(pushedButton) {
     if(!pushedButton) return;
@@ -155,8 +168,16 @@ unsafeWindow.showJourneyIframe = function(journeyID,formElement,value) {
 
     if(formElement) urlHash = `#${formElement}=${value}`;
 
+    // if there's a previous frame for this journey, remove it before we make another
+    const residualFrame = document.querySelector(`#iframe-${journeyID}`);
+
+    if(typeof(residualFrame) != "undefined" && residualFrame != null) {
+        residualFrame.remove();
+    }
+
+
     document.querySelector(`[journey-id="${journeyID}"]`).parentElement.innerHTML += `
-        <iframe src="https://my.railmiles.me/journeys/edit/${journeyID}${urlHash}" style="width: 100%; height: 300px;"></iframe>
+        <iframe id="iframe-${journeyID}" src="https://my.railmiles.me/journeys/edit/${journeyID}${urlHash}" style="width: 100%; height: 300px;"></iframe>
     `;
 
     unsafeWindow.setTimeout(function() {
@@ -185,6 +206,10 @@ unsafeWindow.markJourneys = function(action, dateNumber) {
             console.log("how did you get here?");
     }
 
+}
+
+unsafeWindow.closeFrames = function() {
+    document.querySelectorAll("iframe").forEach(e=>e.remove());
 }
 
 // this is horrible to work in but oh well
