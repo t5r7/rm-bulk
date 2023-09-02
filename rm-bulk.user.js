@@ -75,7 +75,14 @@
     const buttonHolder = document.querySelector("#container > div:nth-child(1) > div:nth-child(1) > p:nth-child(6)");
 
     buttonHolder.innerHTML += `<br><br><hr><br>
-        <b>Bulk Options</b> (click a journey to mark it)<br><br>
+        <b>Bulk Options</b> (click a journey to mark it)
+
+        <br><br>
+
+        Selection Tools:<br>
+        <button onclick="markJourneys('all')">✅ Mark All</button> <button onclick="markJourneys('none')">❌ Mark None</button> <button onclick="markJourneys('invert')">🔄 Invert Marked</button>
+
+        <br><br>
 
         Update Travel Reason:<br>
         <button class="bulk-butt" data-form="reason" data-value="0">🏖️ Leisure</button>
@@ -141,6 +148,29 @@ unsafeWindow.showJourneyIframe = function(journeyID,formElement,value) {
     }, 2000);
 }
 
+unsafeWindow.markJourneys = function(action, element) {
+    if(element) return alert("todo!");
+
+    const allJourneys = document.querySelectorAll(".journey.clearfix:not(.deleted)");
+
+    switch(action) {
+        case "all":
+            // mark all
+            allJourneys.forEach(e=>e.classList.add("bulk-selected"));
+            break;
+        case "none":
+            // mark none
+            allJourneys.forEach(e=>e.classList.remove("bulk-selected"));
+            break;
+        case "invert":
+            // invert selection
+            allJourneys.forEach(e=>e.classList.toggle("bulk-selected"));
+            break;
+        default:
+            console.log("how did you get here?");
+    }
+
+}
 
 // this is horrible to work in but oh well
 GM_addStyle(`
