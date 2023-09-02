@@ -10,71 +10,86 @@
 // @grant        unsafeWindow
 // ==/UserScript==
 
-(function() {
-    'use strict';
-    console.log("script loaded!");
+(function () {
+  "use strict";
+  console.log("script loaded!");
 
-    const thisPath = window.location.pathname;
-    // are we on an individual journey page?
-    // true = yes, false = another page
-    const journeyPage = thisPath.includes("journeys/rail/edit") ? true : false;
+  const thisPath = window.location.pathname;
+  // are we on an individual journey page?
+  // true = yes, false = another page
+  const journeyPage = thisPath.includes("journeys/rail/edit") ? true : false;
 
-    // if we are on a journey page, we need to edit the form and then submit
-    if(journeyPage) {
-        console.log("journey page!");
+  // if we are on a journey page, we need to edit the form and then submit
+  if (journeyPage) {
+    console.log("journey page!");
 
-        // for some reason, query params didn't work, so we'll use this
-        const hash = window.location.hash.replace("#","");
+    // for some reason, query params didn't work, so we'll use this
+    const hash = window.location.hash.replace("#", "");
 
-        if(!hash) return console.log(`${window.location.pathname}: no hash, done here!`);
+    if (!hash)
+      return console.log(`${window.location.pathname}: no hash, done here!`);
 
-        const formElementName = hash.split("=")[0];
-        const value = hash.split("=")[1];
+    const formElementName = hash.split("=")[0];
+    const value = hash.split("=")[1];
 
-        console.log(`${window.location.pathname}: going to set name=${formElementName} to ${value}`);
+    console.log(
+      `${window.location.pathname}: going to set name=${formElementName} to ${value}`
+    );
 
-        // make sure the element exists first
-        const formElement = document.querySelector(`[name="${formElementName}"]`);
-        if(!formElement) return console.error(`${window.location.pathname}: name=${formElementName} doesn't exist`);
+    // make sure the element exists first
+    const formElement = document.querySelector(`[name="${formElementName}"]`);
+    if (!formElement)
+      return console.error(
+        `${window.location.pathname}: name=${formElementName} doesn't exist`
+      );
 
-        // visuals (scroll into view and make blue)
-        formElement.parentElement.style.color = "blue";
-        formElement.style.color = "blue";
-        formElement.style["font-weight"] = "bold";
-        formElement.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
+    // visuals (scroll into view and make blue)
+    formElement.parentElement.style.color = "blue";
+    formElement.style.color = "blue";
+    formElement.style["font-weight"] = "bold";
+    formElement.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+      inline: "center",
+    });
 
-        // actually set the value
-        formElement.value = value;
+    // actually set the value
+    formElement.value = value;
 
-        // submit the form after a short delay!
-        const delaySecs = 0;
-        window.setTimeout(function() {
-            document.querySelector("form[method=post]").submit();
-        }, delaySecs*1000);
+    // submit the form after a short delay!
+    const delaySecs = 0;
+    window.setTimeout(function () {
+      document.querySelector("form[method=post]").submit();
+    }, delaySecs * 1000);
 
-        return; // we are done here (todo: close iframe after a delay?)
-    }
+    return; // we are done here (todo: close iframe after a delay?)
+  }
 
-    // if we have gotten this far, we are not on the page for an individual journey
-    // we should check if we're on the journey list page
-    if(!thisPath.includes("journeys/list")) return console.log("not on journey list or journey page! nothing to do!");
+  // if we have gotten this far, we are not on the page for an individual journey
+  // we should check if we're on the journey list page
+  if (!thisPath.includes("journeys/list"))
+    return console.log("not on journey list or journey page! nothing to do!");
 
-    console.log("journey list page!");
+  console.log("journey list page!");
 
-    const journeyElements = document.querySelectorAll(".journey.clearfix:not(.deleted)");
+  const journeyElements = document.querySelectorAll(
+    ".journey.clearfix:not(.deleted)"
+  );
 
-    for(const e of journeyElements) {
-        const jID = e.children[0].getAttribute("journey-id");
+  for (const e of journeyElements) {
+    const jID = e.children[0].getAttribute("journey-id");
 
-        // for some reason here, e.onclick didn't work
-        e.setAttribute("onclick", "this.classList.toggle('bulk-selected')");
-    }
+    // for some reason here, e.onclick didn't work
+    e.setAttribute("onclick", "this.classList.toggle('bulk-selected')");
+  }
 
-    // show the buttons to mess with journeys
-    // this is the final line of text before the journeys change, just copied from dev tools (todo: find a better spot)
-    const buttonHolder = document.querySelector("#container > div:nth-child(1) > div:nth-child(1) > p:nth-child(6)");
+  // show the buttons to mess with journeys
+  // this is the final line of text before the journeys change, just copied from dev tools (todo: find a better spot)
+  const buttonHolder = document.querySelector(
+    "#container > div:nth-child(1) > div:nth-child(1) > p:nth-child(6)"
+  );
 
-    buttonHolder.innerHTML += `<br><br><hr><br>
+  buttonHolder.innerHTML += `<br><br><hr><br>
         <b style="font-size: 1.5em;">Bulk Options</b> or click journeys to mark or unmark them<br>
 
         <button class="aux-butt" onclick="markJourneys('all')">✅ Mark All</button>
@@ -88,6 +103,10 @@
         <br>
         Mark by Text Match (typing here will clear your currently marked journeys!)
         <input type="text" onload="this.value="" onkeyup="markByText(this.value)" placeholder="Home Station"></input>
+
+        <br>
+
+        <b id="marked-num" style="font-size: 1.5em;">0</b> of <span id="total-num">0</span> marked
 
         <br><br>
 
@@ -110,18 +129,18 @@
         <button class="bulk-butt" data-form="hidden" data-value="10">🥷 Hidden</button>
     `;
 
-    // make the buttons work!
-    for(const e of document.querySelectorAll(".bulk-butt")) {
-        // again, e.onclick failed me here so this is a janky fix
-        e.setAttribute("onclick", "bulkUpdateJourneys(this)");
-    }
+  // make the buttons work!
+  for (const e of document.querySelectorAll(".bulk-butt")) {
+    // again, e.onclick failed me here so this is a janky fix
+    e.setAttribute("onclick", "bulkUpdateJourneys(this)");
+  }
 
-    // for every date, add buttons and make its group have an ID
-    let dateNum = 0;
-    for (const e of document.querySelectorAll("h3")) {
-        e.nextElementSibling.id = `date-${dateNum}`;
+  // for every date, add buttons and make its group have an ID
+  let dateNum = 0;
+  for (const e of document.querySelectorAll("h3")) {
+    e.nextElementSibling.id = `date-${dateNum}`;
 
-        e.innerHTML += `
+    e.innerHTML += `
             <span>
                 <button class="aux-butt" onclick="markJourneys('all', 'date-${dateNum}')">✅ Mark All</button>
                 <button class="aux-butt" onclick="markJourneys('none', 'date-${dateNum}')">❌ Mark None</button>
@@ -129,10 +148,9 @@
             </span>
         `;
 
-        dateNum++;
-    }
+    dateNum++;
+  }
 })();
-
 
 // not sure why we need unsafeWindow since a second ago it was working with just window...
 // journeyQueue is so we can space out the requests and not load a lot of iframes at once
@@ -140,99 +158,115 @@ unsafeWindow.journeyQueue = 0;
 // buffer time is the ms to wait between updating each journey
 unsafeWindow.bufferTime = 1000;
 
-unsafeWindow.bulkUpdateJourneys = function(pushedButton) {
-    if(!pushedButton) return;
+unsafeWindow.bulkUpdateJourneys = function (pushedButton) {
+  if (!pushedButton) return;
 
-    const formName = pushedButton.getAttribute("data-form");
-    const formValue = pushedButton.getAttribute("data-value");
+  const formName = pushedButton.getAttribute("data-form");
+  const formValue = pushedButton.getAttribute("data-value");
 
-    // get all of the marked journeys
-    const marked = document.querySelectorAll(".bulk-selected");
+  // get all of the marked journeys
+  const marked = document.querySelectorAll(".bulk-selected");
 
-    for(const j of marked) {
-        // increase the queue length for buffering
-        unsafeWindow.journeyQueue++;
-        console.log("+", unsafeWindow.journeyQueue);
+  for (const j of marked) {
+    // increase the queue length for buffering
+    unsafeWindow.journeyQueue++;
+    console.log("+", unsafeWindow.journeyQueue);
 
-        // get the journey ID
-        const jID = j.children[0].getAttribute("journey-id");
+    // get the journey ID
+    const jID = j.children[0].getAttribute("journey-id");
 
-        // update the journey after a set time
-        window.setTimeout(function() {
-            showJourneyIframe(jID, formName, formValue);
-        }, unsafeWindow.bufferTime*unsafeWindow.journeyQueue);
+    // update the journey after a set time
+    window.setTimeout(function () {
+      showJourneyIframe(jID, formName, formValue);
+    }, unsafeWindow.bufferTime * unsafeWindow.journeyQueue);
+  }
+};
 
-    }
-}
+unsafeWindow.showJourneyIframe = function (journeyID, formElement, value) {
+  if (!journeyID) return;
 
-unsafeWindow.showJourneyIframe = function(journeyID,formElement,value) {
-    if(!journeyID) return;
+  let urlHash = ``;
 
-    let urlHash = ``;
+  if (formElement) urlHash = `#${formElement}=${value}`;
 
-    if(formElement) urlHash = `#${formElement}=${value}`;
+  // if there's a previous frame for this journey, remove it before we make another
+  const residualFrame = document.querySelector(`#iframe-${journeyID}`);
 
-    // if there's a previous frame for this journey, remove it before we make another
-    const residualFrame = document.querySelector(`#iframe-${journeyID}`);
+  if (typeof residualFrame != "undefined" && residualFrame != null) {
+    residualFrame.remove();
+  }
 
-    if(typeof(residualFrame) != "undefined" && residualFrame != null) {
-        residualFrame.remove();
-    }
-
-
-    document.querySelector(`[journey-id="${journeyID}"]`).parentElement.innerHTML += `
+  document.querySelector(
+    `[journey-id="${journeyID}"]`
+  ).parentElement.innerHTML += `
         <iframe id="iframe-${journeyID}" src="https://my.railmiles.me/journeys/edit/${journeyID}${urlHash}" style="width: 100%; height: 300px;"></iframe>
     `;
 
-    unsafeWindow.setTimeout(function() {
-        unsafeWindow.journeyQueue--;
-        console.log("-", unsafeWindow.journeyQueue);
-    }, 2000);
-}
+  unsafeWindow.setTimeout(function () {
+    unsafeWindow.journeyQueue--;
+    console.log("-", unsafeWindow.journeyQueue);
+  }, 2000);
+};
 
-unsafeWindow.markJourneys = function(action, dateNumber) {
-    const allJourneys = document.querySelectorAll(`${dateNumber?`#${dateNumber}`:""} .journey.clearfix:not(.deleted)`);
+unsafeWindow.markJourneys = function (action, dateNumber) {
+  const allJourneys = document.querySelectorAll(
+    `${dateNumber ? `#${dateNumber}` : ""} .journey.clearfix:not(.deleted)`
+  );
 
-    switch(action) {
-        case "all":
-            // mark all
-            allJourneys.forEach(e=>e.classList.add("bulk-selected"));
-            break;
-        case "none":
-            // mark none
-            allJourneys.forEach(e=>e.classList.remove("bulk-selected"));
-            break;
-        case "invert":
-            // invert selection
-            allJourneys.forEach(e=>e.classList.toggle("bulk-selected"));
-            break;
-        default:
-            console.log("how did you get here?");
+  switch (action) {
+    case "all":
+      // mark all
+      allJourneys.forEach((e) => e.classList.add("bulk-selected"));
+      break;
+    case "none":
+      // mark none
+      allJourneys.forEach((e) => e.classList.remove("bulk-selected"));
+      break;
+    case "invert":
+      // invert selection
+      allJourneys.forEach((e) => e.classList.toggle("bulk-selected"));
+      break;
+    default:
+      console.log("how did you get here?");
+  }
+
+  updateCounters();
+};
+
+unsafeWindow.markByText = function (text) {
+  // first, unmark everything
+  markJourneys("none");
+
+  if (text == "") return;
+
+  const allJourneys = document.querySelectorAll(
+    `.journey.clearfix:not(.deleted)`
+  );
+  console.log("searching");
+
+  for (const j of allJourneys) {
+    const jText = j.innerText;
+
+    if (jText.toLowerCase().includes(text.toLowerCase())) {
+      j.classList.add("bulk-selected");
     }
+  }
 
-}
+  updateCounters();
+};
 
-unsafeWindow.markByText = function(text) {
-    // first, unmark everything
-    markJourneys("none");
+unsafeWindow.updateCounters = function () {
+  document.getElementById("marked-num").innerText = document.querySelectorAll(
+    `.journey.clearfix.bulk-selected:not(.deleted)`
+  ).length;
+  document.getElementById("total-num").innerText = document.querySelectorAll(
+    `.journey.clearfix:not(.deleted)`
+  ).length;
+};
 
-    if(text == "") return;
-
-    const allJourneys = document.querySelectorAll(`.journey.clearfix:not(.deleted)`);
-    console.log("searching");
-
-    for(const j of allJourneys) {
-        const jText = j.innerText;
-
-        if(jText.toLowerCase().includes(text.toLowerCase())) {
-            j.classList.add("bulk-selected");
-        }
-    }
-}
-
-unsafeWindow.closeFrames = function() {
-    document.querySelectorAll("iframe").forEach(e=>e.remove());
-}
+unsafeWindow.closeFrames = function () {
+  document.querySelectorAll("iframe").forEach((e) => e.remove());
+};
 
 // this is horrible to work in but oh well
 GM_addStyle(`
