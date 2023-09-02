@@ -75,14 +75,15 @@
     const buttonHolder = document.querySelector("#container > div:nth-child(1) > div:nth-child(1) > p:nth-child(6)");
 
     buttonHolder.innerHTML += `<br><br><hr><br>
-        <b>Bulk Options</b> (click a journey to mark it)
+        <b style="font-size: 1.5em;">Bulk Options</b> or click journeys to mark or unmark them<br>
+
+        <button class="aux-butt" onclick="markJourneys('all')">✅ Mark All</button>
+        <button class="aux-butt" onclick="markJourneys('none')">❌ Mark None</button>
+        <button class="aux-butt" onclick="markJourneys('invert')">🔄 Invert Marked</button>
 
         <br><br>
 
-        Selection Tools:<br>
-        <button onclick="markJourneys('all')">✅ Mark All</button> <button onclick="markJourneys('none')">❌ Mark None</button> <button onclick="markJourneys('invert')">🔄 Invert Marked</button>
-
-        <br><br>
+        <b style="font-size: 1.5em;">Actions</b> <span style="color: darkred;">There is no undo!</span> Please be sure you have the right journeys selected!</span><br>
 
         Update Travel Reason:<br>
         <button class="bulk-butt" data-form="reason" data-value="0">🏖️ Leisure</button>
@@ -189,5 +190,5 @@ unsafeWindow.markJourneys = function(action, dateNumber) {
 // this is horrible to work in but oh well
 GM_addStyle(`
     .journey.clearfix.bulk-selected { background-color: lightblue }
-    .aux-butt { background-color: #eee; color: #008CBA; font-size: 0.5em; padding: 0.5em 2em; }
+    .aux-butt { background-color: #eee; color: #008CBA; padding: 0.5em 2em; }
 `);
