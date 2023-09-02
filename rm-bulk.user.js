@@ -85,6 +85,10 @@
         <span style="display:inline-block;width:2em;"></span>
         <button class="aux-butt" onclick="closeFrames()">🖼️ Close Frames</button>
 
+        <br>
+        Mark by Text Match (typing here will clear your currently marked journeys!)
+        <input type="text" onload="this.value="" onkeyup="markByText(this.value)" placeholder="Home Station"></input>
+
         <br><br>
 
         <b style="font-size: 1.5em;">Actions</b> <span style="color: darkred;">There is no undo!</span> Please be sure you have the right journeys selected!</span><br>
@@ -134,7 +138,7 @@
 // journeyQueue is so we can space out the requests and not load a lot of iframes at once
 unsafeWindow.journeyQueue = 0;
 // buffer time is the ms to wait between updating each journey
-unsafeWindow.bufferTime = 500;
+unsafeWindow.bufferTime = 1000;
 
 unsafeWindow.bulkUpdateJourneys = function(pushedButton) {
     if(!pushedButton) return;
@@ -206,6 +210,24 @@ unsafeWindow.markJourneys = function(action, dateNumber) {
             console.log("how did you get here?");
     }
 
+}
+
+unsafeWindow.markByText = function(text) {
+    // first, unmark everything
+    markJourneys("none");
+
+    if(text == "") return;
+
+    const allJourneys = document.querySelectorAll(`.journey.clearfix:not(.deleted)`);
+    console.log("searching");
+
+    for(const j of allJourneys) {
+        const jText = j.innerText;
+
+        if(jText.toLowerCase().includes(text.toLowerCase())) {
+            j.classList.add("bulk-selected");
+        }
+    }
 }
 
 unsafeWindow.closeFrames = function() {
