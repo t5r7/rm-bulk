@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Railmiles Bulk Updater (Unofficial)
 // @namespace    https://tomr.me
-// @version      1.0
+// @version      1.0.1
 // @description  Add the ability to bulk update journeys logged with Railmiles.me
 // @author       TomR.me
 // @match        https://my.railmiles.me/*
@@ -41,7 +41,7 @@
 
     // check whether we are being invoked from the railmiles site
     if (window.parent.location.hostname.toLowerCase() !== "my.railmiles.me") return alert("RailMiles Bulk Updater:\nYOU SHOULD NEVER SEE THIS. Something has gone wrong, or someone has attempted to execute a CSRF attack.");
-    
+
     // check if we are in a frame or not
     if (window == window.parent) return alert("RailMiles Bulk Updater:\nCannot be ran outside of a frame!");
 
@@ -80,7 +80,7 @@
     const jID = e.children[0].getAttribute("journey-id");
 
     // for some reason here, e.onclick didn't work
-    e.setAttribute("onclick", "this.classList.toggle('bulk-selected')");
+    e.setAttribute("onclick", "this.classList.toggle('bulk-selected'); updateCounters();");
     e.innerHTML += `<a href="javascript:showJourneyIframe(${jID})">edit inline</a>`;
 
   }
@@ -262,6 +262,8 @@ unsafeWindow.updateCounters = function() {
     `.journey.clearfix:not(.deleted)`
   ).length;
 };
+// run onload
+updateCounters();
 
 unsafeWindow.closeFrames = function() {
   document.querySelectorAll("iframe").forEach((e) => e.remove());
