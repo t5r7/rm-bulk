@@ -5,12 +5,12 @@
 // @description  Add the ability to bulk update journeys logged with Railmiles.me
 // @author       TomR.me
 // @match        https://my.railmiles.me/*
-// @icon         https://www.google.com/s2/favicons?sz=64&domain=railmiles.me
+// @icon         http://www.railmiles.me/assets/img/rm-logo-sm.png
 // @grant        GM_addStyle
 // @grant        unsafeWindow
 // ==/UserScript==
 
-(function () {
+(function() {
   "use strict";
   console.log("script loaded!");
 
@@ -26,8 +26,7 @@
     // for some reason, query params didn't work, so we'll use this
     const hash = window.location.hash.replace("#", "");
 
-    if (!hash)
-      return console.log(`${window.location.pathname}: no hash, done here!`);
+    if (!hash) return console.log(`${window.location.pathname}: no hash, done here!`);
 
     const formElementName = hash.split("=")[0];
     const value = hash.split("=")[1];
@@ -38,27 +37,26 @@
 
     // make sure the element exists first
     const formElement = document.querySelector(`[name="${formElementName}"]`);
-    if (!formElement)
-      return console.error(
-        `${window.location.pathname}: name=${formElementName} doesn't exist`
-      );
+    if (!formElement) return console.error(`${window.location.pathname}: name=${formElementName} doesn't exist`);
+
+    // check whether we are being invoked from the railmiles site
+    if (window.parent.location.hostname.toLowerCase() !== "my.railmiles.me") return alert("RailMiles Bulk Updater:\nYOU SHOULD NEVER SEE THIS. Something has gone wrong, or someone has attempted to execute a CSRF attack.");
+    
+    // check if we are in a frame or not
+    if (window == window.parent) return alert("RailMiles Bulk Updater:\nCannot be ran outside of a frame!");
 
     // visuals (scroll into view and make blue)
     formElement.parentElement.style.color = "blue";
     formElement.style.color = "blue";
     formElement.style["font-weight"] = "bold";
-    formElement.scrollIntoView({
-      behavior: "smooth",
-      block: "center",
-      inline: "center",
-    });
+    formElement.scrollIntoView({ behavior: "smooth", block: "center", inline: "center", });
 
     // actually set the value
     formElement.value = value;
 
     // submit the form after a short delay!
     const delaySecs = 0;
-    window.setTimeout(function () {
+    window.setTimeout(function() {
       document.querySelector("form[method=post]").submit();
     }, delaySecs * 1000);
 
@@ -67,8 +65,9 @@
 
   // if we have gotten this far, we are not on the page for an individual journey
   // we should check if we're on the journey list page
-  if (!thisPath.includes("journeys/list"))
+  if (!thisPath.includes("journeys/list")) {
     return console.log("not on journey list or journey page! nothing to do!");
+  }
 
   console.log("journey list page!");
 
@@ -76,11 +75,14 @@
     ".journey.clearfix:not(.deleted)"
   );
 
+  // mark journeys by clicking on them
   for (const e of journeyElements) {
     const jID = e.children[0].getAttribute("journey-id");
 
     // for some reason here, e.onclick didn't work
     e.setAttribute("onclick", "this.classList.toggle('bulk-selected')");
+    e.innerHTML += `<a href="javascript:showJourneyIframe(${jID})">edit inline</a>`;
+
   }
 
   // show the buttons to mess with journeys
@@ -158,7 +160,7 @@ unsafeWindow.journeyQueue = 0;
 // buffer time is the ms to wait between updating each journey
 unsafeWindow.bufferTime = 1000;
 
-unsafeWindow.bulkUpdateJourneys = function (pushedButton) {
+unsafeWindow.bulkUpdateJourneys = function(pushedButton) {
   if (!pushedButton) return;
 
   const formName = pushedButton.getAttribute("data-form");
@@ -176,13 +178,13 @@ unsafeWindow.bulkUpdateJourneys = function (pushedButton) {
     const jID = j.children[0].getAttribute("journey-id");
 
     // update the journey after a set time
-    window.setTimeout(function () {
+    window.setTimeout(function() {
       showJourneyIframe(jID, formName, formValue);
     }, unsafeWindow.bufferTime * unsafeWindow.journeyQueue);
   }
 };
 
-unsafeWindow.showJourneyIframe = function (journeyID, formElement, value) {
+unsafeWindow.showJourneyIframe = function(journeyID, formElement, value) {
   if (!journeyID) return;
 
   let urlHash = ``;
@@ -191,10 +193,7 @@ unsafeWindow.showJourneyIframe = function (journeyID, formElement, value) {
 
   // if there's a previous frame for this journey, remove it before we make another
   const residualFrame = document.querySelector(`#iframe-${journeyID}`);
-
-  if (typeof residualFrame != "undefined" && residualFrame != null) {
-    residualFrame.remove();
-  }
+  if (typeof residualFrame != "undefined" && residualFrame != null) residualFrame.remove();
 
   document.querySelector(
     `[journey-id="${journeyID}"]`
@@ -202,13 +201,13 @@ unsafeWindow.showJourneyIframe = function (journeyID, formElement, value) {
         <iframe id="iframe-${journeyID}" src="https://my.railmiles.me/journeys/edit/${journeyID}${urlHash}" style="width: 100%; height: 300px;"></iframe>
     `;
 
-  unsafeWindow.setTimeout(function () {
+  unsafeWindow.setTimeout(function() {
     unsafeWindow.journeyQueue--;
     console.log("-", unsafeWindow.journeyQueue);
   }, 2000);
 };
 
-unsafeWindow.markJourneys = function (action, dateNumber) {
+unsafeWindow.markJourneys = function(action, dateNumber) {
   const allJourneys = document.querySelectorAll(
     `${dateNumber ? `#${dateNumber}` : ""} .journey.clearfix:not(.deleted)`
   );
@@ -233,7 +232,7 @@ unsafeWindow.markJourneys = function (action, dateNumber) {
   updateCounters();
 };
 
-unsafeWindow.markByText = function (text) {
+unsafeWindow.markByText = function(text) {
   // first, unmark everything
   markJourneys("none");
 
@@ -255,7 +254,7 @@ unsafeWindow.markByText = function (text) {
   updateCounters();
 };
 
-unsafeWindow.updateCounters = function () {
+unsafeWindow.updateCounters = function() {
   document.getElementById("marked-num").innerText = document.querySelectorAll(
     `.journey.clearfix.bulk-selected:not(.deleted)`
   ).length;
@@ -264,7 +263,7 @@ unsafeWindow.updateCounters = function () {
   ).length;
 };
 
-unsafeWindow.closeFrames = function () {
+unsafeWindow.closeFrames = function() {
   document.querySelectorAll("iframe").forEach((e) => e.remove());
 };
 
