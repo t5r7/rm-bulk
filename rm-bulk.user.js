@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Railmiles Bulk Updater (Unofficial)
 // @namespace    https://tomr.me
-// @version      1.0.2
+// @version      1.0.3
 // @description  Add the ability to bulk update journeys logged with Railmiles.me
 // @author       TomR.me
 // @match        https://my.railmiles.me/*
@@ -273,4 +273,14 @@ unsafeWindow.closeFrames = function() {
 GM_addStyle(`
     .journey.clearfix.bulk-selected { background-color: lightblue }
     .aux-butt { background-color: #eee; color: #008CBA; padding: 0.5em 2em; }
+
+    /* fix the ship icon! */
+    .glyphicons-boat {
+        background-size: contain;
+        background-position: center center;
+        /*
+          i am pretty sure that the ship icon is included in the bootstrap license, so is okay to include here.
+          railmiles use the other transport emojis that aren't showcased on the bootstrap page, so ¯\_(ツ)_/¯
+        */
+        background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAAM1BMVEX///8zMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzOYH8YOAAAAEXRSTlMAEMD/oGAw4FCAcPAgsNBAkDPfUREAAAEWSURBVHgB7dQJa8QgEAXgcZ5x1Jz//9dWSlqz4tYXoLBAPq5H2DVhDuWjPZzilzq5z+PCy20OL5zcNeHFJHcERYcGITlDlwkp4o0onIQ3knAUgO91VYWDIksjoxBKQBGIpxX1LhSZnmHlKtNn/XondhLcpePRq/qfTK5E/WH0M77NPtaDuTGy+u96hpGjpADmGY3zmZIl6GOKsKwYWJfBDAz5/z0gYGiwDxsGNv4u7Zv4LvJ9pMtI7eOOP+3cNhemakCbTcZyvYAT2pxlbNmA7Wx2aPMijJSGuc/llLLjc2s3FLazueEOnA7H5O7rT8bkvbuFRh/TbmViP77mJFcrW76aV7kKaT3IBp4Vtygf5pnEZxIfjy+fSRgixwPUagAAAABJRU5ErkJggg==")    }
 `);
