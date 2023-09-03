@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Railmiles Bulk Updater (Unofficial)
 // @namespace    https://tomr.me
-// @version      1.0.1
+// @version      1.0.2
 // @description  Add the ability to bulk update journeys logged with Railmiles.me
 // @author       TomR.me
 // @match        https://my.railmiles.me/*
@@ -71,6 +71,9 @@
 
   console.log("journey list page!");
 
+  // v v hacky
+  window.setTimeout(function() { updateCounters() }, 1000);
+
   const journeyElements = document.querySelectorAll(
     ".journey.clearfix:not(.deleted)"
   );
@@ -81,8 +84,7 @@
 
     // for some reason here, e.onclick didn't work
     e.setAttribute("onclick", "this.classList.toggle('bulk-selected'); updateCounters();");
-    e.innerHTML += `<a href="javascript:showJourneyIframe(${jID})">edit inline</a>`;
-
+    if(e.children[2]) e.children[2].innerHTML += `<a href="javascript:showJourneyIframe(${jID});" onclick="this.remove();" style="color: #000; filter: invert(0.5);">edit inline</a>`;
   }
 
   // show the buttons to mess with journeys
@@ -262,8 +264,6 @@ unsafeWindow.updateCounters = function() {
     `.journey.clearfix:not(.deleted)`
   ).length;
 };
-// run onload
-updateCounters();
 
 unsafeWindow.closeFrames = function() {
   document.querySelectorAll("iframe").forEach((e) => e.remove());
