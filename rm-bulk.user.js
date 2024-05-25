@@ -200,7 +200,7 @@ unsafeWindow.showJourneyIframe = function(journeyID, formElement, value) {
   document.querySelector(
     `[journey-id="${journeyID}"]`
   ).parentElement.innerHTML += `
-        <iframe id="iframe-${journeyID}" src="https://my.railmiles.me/journeys/edit/${journeyID}${urlHash}" style="width: 100%; height: 300px;"></iframe>
+        <iframe frameBorder="0" id="iframe-${journeyID}" src="https://my.railmiles.me/journeys/edit/${journeyID}${urlHash}" style="width: 100%; height: 300px;"></iframe>
     `;
 
   unsafeWindow.setTimeout(function() {
